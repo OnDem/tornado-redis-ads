@@ -6,6 +6,7 @@ import redis
 import logging
 from string import split
 from random import randint
+from datetime import datetime
 
 configFile = './config.csv'
 
@@ -17,6 +18,7 @@ redisClient = redis.Redis(connection_pool=redisConnectionPool)
 redisClient.flushdb()
 
 def on_set(bannerUrl,paidShows):
+  log.debug(datetime.now())
   log.debug("set banner views: %s - %d " % (bannerUrl,paidShows))
 
 with open(configFile) as f:
@@ -45,7 +47,6 @@ class MainHandler(tornado.web.RequestHandler):
       paidShows = paidShows - 1
       if paidShows > 1:
         redisClient.sadd(bannerCategory,"%s#%d" % (bannerUrl,paidShows))
-      on_set(bannerUrl,paidShows)
     self.set_header('Content-Type', 'text/html; charset=utf-8')
     self.render("banner.html", title="banner", bannerUrl=bannerUrl, paidShows=paidShows, cc=bannerCategory)
 
